@@ -16,12 +16,8 @@ db = SQLAlchemy(app)
 api = Api(app)
 movie_ns = api.namespace('movies')
 
-# movie_with_genre_and_director =
-
+# Возвращает список всех фильмов наше БД
 @movie_ns.route("/")
-"""
-Возвращает список всех фильмов наше БД
-"""
 class MoviesView(Resource):
 
     def get(self): # получение списка сущностей
@@ -45,16 +41,14 @@ class MoviesView(Resource):
             db.session.add(new_movie)
         return f"Объект c id {new_movie.id} создан!", 201
 
+#Возвращает информацию по конкретному фильму (movie_id)
 @movie_ns.route("/<int:movie_id>")
-"""
-Возвращает информацию по конкретному фильму (movie_id)
-"""
 class MovieView(Resource):
 
     def get(self, movie_id: int): # получаем фильм по movie_id, который задаём сами
-        movie = db.session.query(Movie.id, Movie.title, Movie.description, Movie.rating, Movie.trailer, Genre.name.label('genre'), Director.name.label('director')).join(Genre).join(Director).filter(Movie.id == movie_id).first()
+        movie = db.session.query(Movie).get(movie_id)
         if movie:
-            return jsonify(movies_schema.dump(movie))
+            return jsonify(movie_schema.dump(movie))
         return "Такого фильма нет", 404
 
     def patch(self, movie_id: int): # частичное обновление (не всех полей) сущности по movie_id (обновляем выборочные поля)
